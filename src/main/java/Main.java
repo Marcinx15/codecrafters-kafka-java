@@ -18,6 +18,7 @@ public class Main {
           out = clientSocket.getOutputStream();
           in = clientSocket.getInputStream();
           KafkaMessage request = KafkaMessage.fromBytes(in.readAllBytes());
+          System.out.println(request);
           out.write(request.toBytes());
       } catch (IOException e) {
           System.out.println("IOException: " + e.getMessage());
