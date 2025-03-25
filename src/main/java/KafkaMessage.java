@@ -10,6 +10,14 @@ public class KafkaMessage {
         this.messageSize = messageSize;
     }
 
+    public Integer getMessageSize() {
+        return messageSize;
+    }
+
+    public HeaderV2 getHeader() {
+        return header;
+    }
+
     public byte[] toBytes() {
         ByteBuffer buffer = ByteBuffer.allocate(8);
         buffer.putInt(messageSize);
@@ -17,13 +25,13 @@ public class KafkaMessage {
         return buffer.array();
     }
 
-    public static KafkaMessage fromBytes(byte[] bytes) {
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+    public static KafkaMessage fromBytes(int messageSize, byte[] bytes) {
         return new KafkaMessage(
-                buffer.getInt(),
-                HeaderV2.fromBytes(Arrays.copyOfRange(bytes, 4, bytes.length))
+                messageSize,
+                HeaderV2.fromBytes(bytes)
         );
     }
+
 
     @Override
     public String toString() {
