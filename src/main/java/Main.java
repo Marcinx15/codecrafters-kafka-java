@@ -11,19 +11,17 @@ public class Main {
       Socket clientSocket = null;
       OutputStream out;
       InputStream in;
+      MessageProcessor processor = new MessageProcessor();
       int port = 9092;
       try {
-          System.err.println("Whatever");
           serverSocket = new ServerSocket(port);
           serverSocket.setReuseAddress(true);
           clientSocket = serverSocket.accept();
           out = clientSocket.getOutputStream();
           in = clientSocket.getInputStream();
-          int requestSize = ByteBuffer.wrap(in.readNBytes(4)).getInt();
-          System.err.println(requestSize);
-          KafkaMessage request = KafkaMessage.fromBytes(requestSize, in.readNBytes(requestSize - 4));
-          System.err.println(request);
-          out.write(new KafkaMessage(0, request.getHeader()).toBytes());
+          KafkaMessage request = deserializeRequest(in);
+          ApiVersionsResponseV4 response = processor.process(request);
+          out.write(response.toBytes());
       } catch (IOException e) {
           System.out.println("IOException: " + e.getMessage());
       } finally {
@@ -35,5 +33,10 @@ public class Main {
               System.out.println("IOException: " + e.getMessage());
           }
       }
+  }
+
+  public static KafkaMessage deserializeRequest(InputStream in) throws IOException {
+      int requestSize = ByteBuffer.wrap(in.readNBytes(4)).getInt();
+      return KafkaMessage.fromBytes(requestSize, in.readNBytes(requestSize - 4));
   }
 }
